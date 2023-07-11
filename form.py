@@ -25,6 +25,8 @@ class Form():
 		st.write("[TOML format](https://toml.io/en/) is a human readable format, thus it is "
 	   		"easy to write a configuration file with any text editor. The user just needs to "
 			"specify the value of the option in front of the option name in the file. ")
+		
+		st.write("If you need more information about an argument you can check ClinicaDL documentation [here](https://clinicadl.readthedocs.io/en/latest/Train/Introduction/)")
 		st.sidebar.markdown("# Your TOML")
 
 		self.toml_dict = {
@@ -94,72 +96,72 @@ class Form():
 		
 		help_multi_cohort = "It is possible to use ClinicaDL's functions on several datasets at the same time."
 		lbl_multi_cohort = "Check this box if you want to do **multi cohort** training"
-		self.multi_cohort = self.create_checkbox(label_=lbl_multi_cohort, help_ = help_multi_cohort)
-		st.sidebar.markdown(f"**multi-cohort**: :blue[{self.multi_cohort}]")
+		multi_cohort = self.create_checkbox(label_=lbl_multi_cohort, help_ = help_multi_cohort)
+		st.sidebar.markdown(f"**multi-cohort**: :blue[{multi_cohort}]")
 
-		if self.multi_cohort :
+		if multi_cohort :
 			help_caps_multi = (" TSV file must contain two sts:\n"
 							"- `cohort` the name of the cohort (must correspond to the values in `TSV_DIRECTORY`),\n"
 							"- `path` the path to the corresponding [CAPS](https://aramislab.paris.inria.fr/clinica/docs/public/latest/CAPS/Introduction/) hierarchy.")
 
-			self.caps_dir = self.create_text_input("Write the path to an input TSV file containing path to CAPS directory:", help_caps_multi, False)
-			caps_dir = Path(self.caps_dir)
-			if not(caps_dir.is_file()):
-				if caps_dir!="":
+			caps_dir = self.create_text_input("Write the path to an input TSV file containing path to CAPS directory:", help_caps_multi, False)
+			if not(caps_dir.ends_with(".tsv")):
+				if caps_dir not in ["", None, "."]:
 					st.warning(f"{caps_dir} is not a TSV file.")
 			st.text("")
 			st.sidebar.markdown(f"**caps_directory**: :green[{caps_dir}]")
 		else :
-			self.caps_dir = self.create_text_input("Write the path to the input folder containing the neuroimaging data in a [CAPS](https://aramislab.paris.inria.fr/clinica/docs/public/latest/CAPS/Introduction/) hierarchy.", None, True)
-			caps_dir = Path(self.caps_dir)
-			if not(caps_dir.is_dir()):
-				if caps_dir!="":
-					st.warning(f"{caps_dir} is not a directory.")
-			st.text("")
+			caps_dir = self.create_text_input("Write the path to the input folder containing the neuroimaging data in a [CAPS](https://aramislab.paris.inria.fr/clinica/docs/public/latest/CAPS/Introduction/) hierarchy.", None, True)
+			# caps_dir = Path(caps_dir)
+			# if not(caps_dir.is_dir()):
+			# 	if caps_dir not in ["", None, "."]:
+			# 		st.warning(f"{caps_dir} is not a directory.")
+			# st.text("")
 			st.sidebar.markdown(f"**caps_directory**: :green[{caps_dir}]")
 
 		help_json="The preprocessing json file stored in the `CAPS_DIRECTORY` that corresponds to the `clinicadl prepare-data` output. This will be used to load the correct tensor inputs with the wanted preprocessing."
 		
-		if not self.multi_cohort :
-			if caps_dir.is_dir():
-				list_json = []
-				list_json.append("Chose the preprocessing json file.")
-				list_json2 = [i for i in caps_dir.iterdir() if i.suffix == ".json"]
-				list_json = list_json + list_json2
-				list_json.append("Enter other path.")
-				preprocessing_json = self.create_select_box("Give the name of the preprocessing json.", list_json, help_json,)
+		# if not multi_cohort :
+		# 	if caps_dir.is_dir():
+		# 		list_json = []
+		# 		list_json.append("Chose the preprocessing json file.")
+		# 		list_json2 = [i for i in caps_dir.iterdir() if i.suffix == ".json"]
+		# 		list_json = list_json + list_json2
+		# 		list_json.append("Enter other path.")
+		# 		preprocessing_json = self.create_select_box("Give the name of the preprocessing json.", list_json, help_json,)
 				
-				if preprocessing_json!= "Chose the preprocessing json file.":
-					if preprocessing_json == "Enter other path.":
-						preprocessing_json2 = self.create_text_input("Enter the path to the json file:")
+		# 		if preprocessing_json!= "Chose the preprocessing json file.":
+		# 			if preprocessing_json == "Enter other path.":
+		# 				preprocessing_json2 = self.create_text_input("Enter the path to the json file:")
 						
-					if Path(preprocessing_json).is_file():
-						with st.expander(f"{preprocessing_json}", expanded= True) :
-							with preprocessing_json.open(mode="r") as f:
-									parameters_json = jsn.load(f)
-							st.json(parameters_json)
-					else:
-						if preprocessing_json != "":	
-							st.warning(f"The file {preprocessing_json} doesn't exist.")
-				self.preprocessing_name= Path(preprocessing_json).name
-				st.sidebar.markdown(f"**preprocessing_json**: {self.preprocessing_name}" )
-		st.text("")
-		st.text("")
+		# 			if Path(preprocessing_json).is_file():
+		# 				with st.expander(f"{preprocessing_json}", expanded= True) :
+		# 					with preprocessing_json.open(mode="r") as f:
+		# 							parameters_json = jsn.load(f)
+		# 					st.json(parameters_json)
+		# 			else:
+		# 				if preprocessing_json != "":	
+		# 					st.warning(f"The file {preprocessing_json} doesn't exist.")
+		# 		self.preprocessing_name= Path(preprocessing_json).name
+		# 		st.sidebar.markdown(f"**preprocessing_json**: {self.preprocessing_name}" )
+		# st.text("")
+		# st.text("")
 			
-		lbl_tsv_dir = "Chose a TSV directory - Give the input folder of a TSV file tree generated by `clinicadl tsvtools {split|kfold}`."
-		tsv_dir = self.create_text_input(lbl_tsv_dir, None, False)
-		kfold_json = Path(tsv_dir) / "kfold.json"
-		split_json = Path(tsv_dir) / "split.json"
-		if kfold_json.is_file():
-			with st.expander(f"{kfold_json}", expanded= True): 
-				with kfold_json.open(mode="r") as f:
-					par_kfold_json = jsn.load(f)
-				st.json(par_kfold_json)
-		if split_json.is_file():
-			with st.expander(f"{split_json}", expanded= True):
-				with split_json.open(mode="r") as f:
-					par_split_json = jsn.load(f)
-				st.json(par_split_json)
+		preprocessing_json = self.create_text_input("Enter the name of the json file.",)
+
+		tsv_dir = self.create_text_input("Give the input folder of a TSV file tree generated by `clinicadl tsvtools {split|kfold}`.", None, False)
+		# kfold_json = Path(tsv_dir) / "kfold.json"
+		# split_json = Path(tsv_dir) / "split.json"
+		# if kfold_json.is_file():
+		# 	with st.expander(f"{kfold_json}", expanded= True): 
+		# 		with kfold_json.open(mode="r") as f:
+		# 			par_kfold_json = jsn.load(f)
+		# 		st.json(par_kfold_json)
+		# if split_json.is_file():
+		# 	with st.expander(f"{split_json}", expanded= True):
+		# 		with split_json.open(mode="r") as f:
+		# 			par_split_json = jsn.load(f)
+		# 		st.json(par_split_json)
 		st.text("")
 		st.sidebar.markdown(f"**tsv_directory**: {tsv_dir}" )
 
@@ -361,28 +363,68 @@ class Form():
 		section_ = "Cross_validation"
 		self.create_new_section("Cross validation")
 
-		self.n_splits = self.create_number_input("Chose a number of splits k to load in the case of a k-fold cross-validation.", min_ = 0, val_ = 0, help_="Default will load a single-split")
-		split_list = []
-		for i in range(self.n_splits):
-			split_list.append(f"{i}")
-		self.split_selected = self.create_multiselect("Chose a subset of folds that will be used for training.", split_list, val_=split_list, help_="By default all splits available are used.")
+		n_splits = self.create_number_input("Chose a number of splits k to load in the case of a k-fold cross-validation.", min_ = 0, val_ = 0, help_="Default will load a single-split")
+		st.sidebar.write(f"**n_splits**: {n_splits}")
+		self.write_dict(section_, "n_splits", n_splits)
 
+		split_list = []
+		for i in range(n_splits):
+			split_list.append(f"{i}")
+		split_selected = self.create_multiselect("Chose a subset of folds that will be used for training.", split_list, val_=split_list, help_="By default all splits available are used.")
+		st.sidebar.write(f"**split**: {split_selected}")
+		self.write_dict(section_, "split", split_selected)
 		#=================================OPTIMIZATION================================
 		section_ = "Optimization"
 		self.create_new_section("Optimization")
 
-		self.optimizer = self.create_select_box("Chose the name of the optimizer used to train the network.", ("Adadelta", "Adagrad", "Adam", "AdamW", "Adamax", "ASGD", "NAdam", "RAdam", "RMSprop", "SGD"), help_=None ,index_=2 )
-		
+		optimizer = self.create_select_box("Chose the name of the optimizer used to train the network.", ("Adadelta", "Adagrad", "Adam", "AdamW", "Adamax", "ASGD", "NAdam", "RAdam", "RMSprop", "SGD"), help_=None ,index_=2 )
+		st.sidebar.write(f"**optimizer**: {optimizer}")
+		self.write_dict(section_, "optimizer", optimizer)
+
 		help_epochs = "If early stopping is disabled, or if its stopping criterion was never reached, training stops when the maximum number of epochs epochs is reached."
-		self.epochs = self.create_number_input("Chose the maximum number of epochs", val_ = 20, min_ = 1, help_ = help_epochs)
+		epochs = self.create_number_input("Chose the maximum number of epochs", val_ = 20, min_ = 1, help_ = help_epochs)
+		st.sidebar.write(f"**epochs**: {epochs}")
+		self.write_dict(section_, "epochs", epochs)
 
 		#st.number_input(label, min_value=None, max_value=None, value=, step=None, format=None, key=None, help=None, on_change=None, args=None, kwargs=None, *, disabled=False, label_visibility="visible")
-		self.learning_rate = st.number_input("Chose the learning rate used to perform weight update.", value = 0.000100, min_value = 0.000000, step=0.000001)
-		self.weight_decay = st.number_input("Chose the weight decay", value = 0.0001, min_value = 0.0, step=0.000001)
-		self.patience = st.number_input("Chose the patience", value = 0, min_value = 0)
-		self.tolerance = st.number_input("Chose the tolerance", value = 0.0, min_value = 0.0, step=0.000001)
-		self.accumulation_steps = st.number_input("Chose the accumulation step", value = 1, min_value = 0)
-		self.profiler = st.checkbox("profiler")
+		learning_rate =  self.create_text_input("Enter the learning rate used to perform weight update.", value_ = "0.0001",space=False)
+		if float(learning_rate)<= 0.000000:
+			st.warning("Learning rate must be a positive number.")
+		elif float(learning_rate)>=1:
+			st.warning("Learning rate must be < 1.")
+		st.text("")
+		st.sidebar.write(f"**learning_rate**: {float(learning_rate)}")
+		self.write_dict(section_, "learning_rate", float(learning_rate))
+
+		weight_decay = self.create_text_input("Chose the weight decay used by the optimizer", value_ = "0.0001", space = False)
+		if float(weight_decay)<= 0.000000:
+			st.warning("Weight decay must be a positive number.")
+		elif float(weight_decay)>=1:
+			st.warning("Weight decay must be < 1.")
+		st.text("")
+		st.sidebar.write(f"**weight_decay**: {float(weight_decay)}")
+		self.write_dict(section_, "weight_decay", float(weight_decay))
+
+		patience = self.create_number_input("Chose the number of epochs for early stopping patience.", val_= 0, min_ = 0)
+		st.sidebar.write(f"**patience**: {patience}")
+		self.write_dict(section_, "patience", patience)
+
+		tolerance = self.create_text_input("Chose the value used for early stopping tolerance.", value_ = "0.0", space = False)
+		if float(tolerance)< 0.000000:
+			st.warning("tolerance must be a positive number.")
+		elif float(tolerance)>=1:
+			st.warning("tolerance must be < 1.")
+		st.text("")
+		st.sidebar.write(f"**tolerance**: {float(tolerance)}")
+		self.write_dict(section_, "tolerance", float(tolerance))
+
+		accumulation_steps = self.create_number_input("Chose the number of iterations during which gradients are accumulated before performing the weights update.", val_ = 1, min_ = 0,help_="This allows to virtually increase the size of the batch.")
+		st.sidebar.write(f"**accumulation_steps**: {accumulation_steps}")
+		self.write_dict(section_, "accumulation_steps", accumulation_steps)
+
+		profiler = self.create_checkbox("Check this box if you want to add a profiler.",)
+		st.sidebar.write(f"**profiler**: {profiler}")
+		self.write_dict(section_, "profiler", profiler)
 
 		#=================================LOAD YOUR TOML================================
 		st.divider()
