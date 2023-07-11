@@ -105,7 +105,7 @@ class Form():
 							"- `path` the path to the corresponding [CAPS](https://aramislab.paris.inria.fr/clinica/docs/public/latest/CAPS/Introduction/) hierarchy.")
 
 			caps_dir = self.create_text_input("Write the path to an input TSV file containing path to CAPS directory:", help_caps_multi, False)
-			if not(caps_dir.ends_with(".tsv")):
+			if not(caps_dir.endswith(".tsv")):
 				if caps_dir not in ["", None, "."]:
 					st.warning(f"{caps_dir} is not a TSV file.")
 			st.text("")
