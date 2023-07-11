@@ -1,5 +1,4 @@
 import streamlit as st
-import clinicadl as cdl
 import json as jsn
 import pandas as pd
 
